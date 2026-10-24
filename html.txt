@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jessie Math捷析 -  星際軌道運算</title>
+
+    <meta name="description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+    <meta property="og:title" content="Jessie Math捷析 -  星際軌道運算">
+    <meta property="og:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+    <meta property="og:type" content="website">
+    
+    <meta property="og:image" content="g5-u16-2.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1536">
+    <meta property="og:image:alt" content="Jessie Math 遊戲封面">
+    
+    <link rel="image_src" href="g5-u16-2.png">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jessie Math捷析 -  星際軌道運算">
+    <meta name="twitter:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+    <meta name="twitter:image" content="g5-u16-2.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ================= 品牌與全域變數 ================= */
+        :root {
+            --brand-orange: #e67e22;
+            --brand-text: #2c3e50;
+            --btn-blue: #3498db;
+            --btn-purple: #8e44ad;
+            --bg-deep-space: #1a0b2e;
+            --neon-purple: #b537f2;
+            --neon-blue: #00f3ff;
+            --crystal-bg: rgba(255, 255, 255, 0.1);
+            --crystal-border: rgba(255, 255, 255, 0.3);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-deep-space);
+            background-image: url('jessie-logo-play.jpg');
+            background-size: cover;
+            background-position: top left;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: white; overflow-x: hidden; min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+
+        /* ================= Header 品牌列 ================= */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px; display: flex; justify-content: space-between;
+            align-items: center; box-shadow: 0 2px 15px rgba(0,0,0,0.5); z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .brand-logo-container {
+            width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--brand-orange);
+            display: flex; justify-content: center; align-items: center; background-color: transparent; overflow: hidden;
+        }
+        .brand-logo-container img { width: 100%; height: auto; }
+        .brand-title { color: var(--brand-text); font-size: 24px; font-weight: bold; letter-spacing: 1px; }
+        .header-right { display: flex; gap: 10px; flex-wrap: wrap;}
+        .nav-btn {
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; transition: all 0.3s; background: white;
+        }
+        .btn-home, .btn-lobby { border: 1px solid var(--btn-blue); color: var(--btn-blue); }
+        .btn-home:hover, .btn-lobby:hover { background: var(--btn-blue); color: white; }
+        .btn-g5 { border: 1px solid var(--btn-purple); color: var(--btn-purple); background: rgba(142, 68, 173, 0.05); }
+        .btn-g5:hover { background: var(--btn-purple); color: white; }
+
+        /* ================= 遊戲容器 ================= */
+        #game-container { flex: 1; position: relative; display: flex; justify-content: center; align-items: flex-start; padding: 20px; overflow: hidden; }
+        .screen {
+            display: none; width: 100%; max-width: 900px; background: var(--crystal-bg); border: 1px solid var(--crystal-border);
+            border-radius: 20px; backdrop-filter: blur(10px); padding: 30px; box-shadow: 0 0 30px rgba(181, 55, 242, 0.3); text-align: center; z-index: 20;
+            margin: 20px auto;
+        }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        /* ================= 首頁 & 排行榜 ================= */
+        input[type="text"] {
+            padding: 15px; font-size: 18px; border-radius: 10px; border: 2px solid var(--neon-purple); background: rgba(0,0,0,0.5);
+            color: white; text-align: center; margin-bottom: 20px; width: 80%; max-width: 300px;
+        }
+        .start-btn {
+            padding: 15px 40px; font-size: 20px; background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+            border: none; border-radius: 30px; color: white; cursor: pointer; font-weight: bold;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5); box-shadow: 0 0 15px var(--neon-purple); transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .start-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-blue); }
+        .leaderboard { margin-top: 30px; background: rgba(0,0,0,0.6); border-radius: 10px; padding: 15px; max-height: 250px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--crystal-border); }
+        th { color: var(--neon-blue); }
+
+        /* ================= 遊戲主畫面 ================= */
+        .hud { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 18px; color: var(--neon-blue); z-index: 10; position: relative; flex-wrap: wrap; gap: 10px;}
+        .question-box { background: rgba(0, 0, 0, 0.7); padding: 20px; border-radius: 15px; border: 1px solid var(--neon-purple); font-size: 20px; margin-bottom: 20px; line-height: 1.5; position: relative; z-index: 10;}
+        .interaction-area { display: flex; flex-direction: column; align-items: center; margin: 30px 0; min-height: 250px; position: relative; z-index: 10;}
+        
+        /* 提升所有互動元素的層級，讓白板塗鴉時也能正常點擊輸入框及按鈕 */
+        #game-container input, #game-container select, #game-container button, .crystal-block, .target-fragment, .crystal-field {
+            position: relative;
+            z-index: 60;
+        }
+
+        .game-controls { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; z-index: 60; position: relative;}
+        .ctrl-btn { padding: 10px 20px; border-radius: 10px; border: 1px solid white; background: rgba(255,255,255,0.2); color: white; cursor: pointer; font-size: 16px; transition: all 0.2s; z-index: 60;}
+        .ctrl-btn:hover { background: rgba(255,255,255,0.4); }
+        .submit-btn { background: var(--neon-purple); border: none; font-weight: bold; }
+
+        /* ================= 第一區 (同心軌道環) ================= */
+        .orbit-layout { display: flex; align-items: center; justify-content: center; gap: 40px; margin-bottom: 20px; flex-wrap: wrap; }
+        .raw-input-box { display: flex; gap: 15px; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; border: 2px solid var(--neon-purple); align-items: center;}
+        .orbit-system { position: relative; width: 220px; height: 220px; margin: 10px auto; display: flex; justify-content: center; align-items: center; }
+        .orbit-ring { position: absolute; border-radius: 50%; border: 4px dashed transparent; transition: border-color 0.5s; }
+        .orbit-outer { width: 220px; height: 220px; border-color: rgba(0, 243, 255, 0.5); }
+        .orbit-inner { width: 160px; height: 160px; border-color: rgba(181, 55, 242, 0.5); }
+        .orbit-core { width: 90px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255,255,255,0.2); transition: all 0.5s; padding: 5px; }
+        .orbit-controls { display: flex; gap: 20px; width: 100%; justify-content: center; margin-top: 10px; flex-wrap:wrap;}
+        .orbit-slider-box { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; border: 1px solid var(--neon-blue); }
+        .orbit-slider-box input[type="range"] { width: 150px; accent-color: var(--neon-purple); }
+        .orbit-val { font-size: 16px; font-weight: bold; color: white; margin-bottom: 2px;}
+        .beam-active .orbit-outer { border-color: var(--neon-blue); border-style: solid; box-shadow: 0 0 30px var(--neon-blue); }
+        .beam-active .orbit-inner { border-color: var(--neon-purple); border-style: solid; box-shadow: 0 0 30px var(--neon-purple); }
+        .beam-active .orbit-core { background: #fff; box-shadow: 0 0 50px #fff; color: black; }
+        
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* ================= 第二區 (晶體切割與拖曳) ================= */
+        .z2-fuse-controls { display: flex; gap: 10px; margin-bottom: 10px; justify-content: center; flex-wrap: wrap;}
+        .fuse-btn { background: rgba(0,0,0,0.6); border: 1px solid var(--brand-orange); color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; transition: 0.2s;}
+        .fuse-btn:hover { background: var(--brand-orange); }
+        .crystal-field { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; min-height: 80px; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 10px; width: 100%; box-sizing: border-box;}
+        .crystal-block { padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: grab; user-select: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: inset 0 0 10px rgba(255,255,255,0.2); font-size: 14px;}
+        .crystal-block:active { cursor: grabbing; }
+        .crystal-hr { background: linear-gradient(135deg, #2980b9, #8e44ad); border: 2px solid var(--neon-purple); }
+        .crystal-min10 { background: linear-gradient(135deg, #d35400, #e67e22); border: 2px solid var(--brand-orange); }
+        .crystal-min1 { background: linear-gradient(135deg, #16a085, #2ecc71); border: 2px solid #00ff88; color: #000; }
+        .crystal-block:hover { transform: scale(1.05); }
+        .fragment-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; margin-top: 10px; }
+        .target-fragment { flex: 1; min-width: 100px; min-height: 120px; border: 3px dashed var(--neon-purple); border-radius: 15px; display: flex; align-items: flex-start; align-content: flex-start; justify-content: center; background: rgba(181, 55, 242, 0.1); transition: 0.3s; padding: 10px; flex-wrap: wrap; gap: 5px; box-sizing: border-box; }
+        .target-fragment.completed { border-style: solid; background: rgba(0, 243, 255, 0.2); border-color: var(--neon-blue); box-shadow: 0 0 30px var(--neon-blue); }
+        .energy-shock { animation: shake 0.4s; border-color: red !important; box-shadow: 0 0 20px red !important; }
+        
+        /* ================= 第三區 (多步驟運算) ================= */
+        .z3-input-group { border:2px solid #ff4757; padding:20px; border-radius:15px; background:rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 20px;}
+        .z3-input-group input { width: 80px; height: 40px; font-size: 24px; text-align: center; background: rgba(255,255,255,0.1); border: none; border-bottom: 2px solid white; color: var(--neon-blue); outline: none;}
+        .z3-input-group select { font-size: 24px; height: 40px; padding: 2px; text-align: center; background: rgba(255,255,255,0.1); border: none; border-bottom: 2px solid white; color: var(--neon-blue); outline: none; cursor: pointer; }
+        .z3-input-group select option { background: var(--bg-deep-space); color: white; }
+        .z3-arrow { font-size: 28px; color: #ff4757; font-weight: bold; margin: 0 15px; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        /* ================= 黑洞特效 ================= */
+        #black-hole-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent var(--safe-zone, 100%), rgba(0,0,0,0.95) var(--danger-zone, 120%));
+            pointer-events: none; z-index: 10; transition: --safe-zone 1s linear, --danger-zone 1s linear; display: none;
+        }
+        .space-beam { animation: beamStrike 1s ease-out; }
+        @keyframes beamStrike { 0% { box-shadow: 0 0 0 0 rgba(0,243,255,0.8); background: rgba(0,243,255,0.3); } 100% { box-shadow: 0 0 100px 50px rgba(0,243,255,0); background: transparent; } }
+        
+        .swirling-black-hole {
+            width: 120px; height: 120px; margin: 10px auto; border-radius: 50%;
+            background: radial-gradient(circle, #000 20%, #4a0e4e 60%, transparent 100%);
+            box-shadow: 0 0 30px #8e44ad, inset 0 0 30px #000;
+            animation: swirl 2s linear infinite; position: relative; display: none;
+        }
+        @keyframes swirl { 100% { transform: rotate(-360deg) scale(1.1); } }
+        .throw-item {
+            position: absolute; width: 18px; height: 18px; background: #00f3ff; border-radius: 50%;
+            animation: throwIn 0.3s forwards; box-shadow: 0 0 10px #00f3ff;
+        }
+        @keyframes throwIn {
+            0% { transform: translateY(-150px) scale(1.5); opacity: 1; }
+            100% { transform: translateY(50px) scale(0); opacity: 0; }
+        }
+
+        #star-gate {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 10px; height: 10px; border-radius: 50%; background: white; z-index: 100;
+            box-shadow: 0 0 50px 20px var(--neon-blue), 0 0 100px 40px var(--neon-purple); display: none;
+        }
+        .gate-opening { animation: openGate 2.5s forwards; display: block !important; }
+        @keyframes openGate { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 50% { transform: translate(-50%, -50%) scale(100); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(200); opacity: 0; display: none;} }
+
+        /* ================= 其他 ================= */
+        #pause-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 200; border-radius: 20px; flex-direction: column; }
+        #pause-overlay h2 { font-size: 40px; color: var(--neon-blue); letter-spacing: 5px; text-align:center;}
+        .sound-toggle { position: fixed; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); border: 1px solid var(--neon-blue); color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 24px; cursor: pointer; z-index: 200; }
+        .badge { width: 150px; border-radius: 50%; box-shadow: 0 0 30px gold; margin: 20px auto; display: none; }
+        .combo-text { color: #f1c40f; font-weight: bold; font-size: 20px; text-shadow: 0 0 10px #e67e22; position: relative; z-index: 20; height: 30px; }
+
+        /* ================= 白板系統 ================= */
+        #whiteboard-container { 
+            display: none; 
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 50; 
+            pointer-events: none; 
+        }
+        #draw-canvas { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: auto; 
+            cursor: crosshair;
+        }
+        .wb-controls { 
+            position: absolute; top: 10px; right: 10px; 
+            background: rgba(0,0,0,0.8); padding: 10px; 
+            border-radius: 12px; border: 1px solid var(--neon-blue);
+            display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;
+            pointer-events: auto; 
+            z-index: 101;
+        }
+        .wb-controls button {
+            background: #333; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; transition: 0.2s;
+        }
+        .wb-controls button:hover { background: #555; }
+        .wb-active-btn { background: var(--neon-blue) !important; color: black !important; font-weight: bold;}
+
+        /* ================= Footer ================= */
+        .footer-pill {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50px;
+            padding: 10px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 800px;
+            color: var(--brand-text);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 14px;
+            z-index: 100;
+        }
+        .footer-left, .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--brand-orange);
+            border-radius: 50%;
+        }
+        .footer-icon {
+            color: var(--btn-blue);
+            font-size: 16px;
+        }
+
+        /* ================= 手機轉向提示 (RWD) ================= */
+        #rotate-prompt {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-deep-space);
+            color: white;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 24px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #rotate-prompt i { font-size: 60px; margin-bottom: 20px; color: var(--brand-orange); }
+
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #rotate-prompt { display: flex !important; }
+            #game-container, header, footer, .sound-toggle { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" src="1.mp3" loop></audio>
+
+    <div id="rotate-prompt">
+        <i class="fas fa-mobile-alt fa-rotate-90"></i>
+        <p>星際導航員，請將設備旋轉至「橫向」<br>以獲得最佳修復視野！</p>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <div class="brand-logo-container">
+                <img src="JESSIEMATH-Q.png" alt="Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+PGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjUiIGZpbGw9IiNlNjdlMjIiLz48L3N2Zz4='"> </div>
+            <div class="brand-title">Jessie Math捷析</div>
+        </div>
+        <div class="header-right">
+            <a href="https://jessiemath0703-chu.github.io/website2/" class="nav-btn btn-home">🏠 首頁</a>
+            <a href="https://jessiemath0703-chu.github.io/Game-Lobby/" class="nav-btn btn-lobby">🎮 遊戲大廳</a>
+            <a href="https://jessiemath0703-chu.github.io/Game-Lobby/#g5-u16" class="nav-btn btn-g5">🔙 G5時間的乘除</a>
+        </div>
+    </header>
+
+    <button class="sound-toggle" onclick="toggleSound()">🔊</button>
+
+    <div id="game-container">
+        <div id="black-hole-layer"></div>
+        <div id="star-gate"></div>
+        
+        <div id="whiteboard-container">
+            <canvas id="draw-canvas"></canvas>
+            <div class="wb-controls">
+                <button id="wb-btn-mouse" onclick="setDrawMode('mouse')">🖱️ 互動作答</button>
+                <button id="wb-btn-pen" onclick="setDrawMode('pen')">✏️ 畫筆</button>
+                <button id="wb-btn-eraser" onclick="setDrawMode('eraser')">🧽 橡皮擦</button>
+                <button onclick="clearWhiteboard()">🗑️ 清除</button>
+                <button onclick="toggleWhiteboard()">❌ 關閉白板</button>
+            </div>
+        </div>
+
+        <div id="start-screen" class="screen active">
+            <h1 style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-purple);">🌌 星際軌道運算：時空修復計畫</h1>
+            <p>歡迎來到晶質基站！星體的軌道環破碎了，黑洞正在擴張...<br>
+            你需要透過計算「時間的乘除」來重新分配能量，修復軌道！<br>
+            <strong style="color:var(--brand-orange)">通關條件：一局共 10 題，答對 5 題 (含) 以上即可擊退黑洞，獲得星際徽章！</strong></p>
+            
+            <input type="text" id="player-name" placeholder="請輸入你的導航員代號 (必填)" required>
+            <br>
+            <button class="start-btn" onclick="initGame()">啟動引擎 (Start)</button>
+
+            <div class="leaderboard">
+                <h3>🏆 星際修復英雄榜 (Top 10)</h3>
+                <table>
+                    <thead>
+                        <tr><th>名次</th><th>導航員</th><th>進度</th><th>狀態</th><th>時間</th></tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <span id="zone-display">區域載入中...</span>
+                <span id="score-display">修復進度：0 / 10</span>
+                <span id="timer-display">時空崩塌倒數：05:00</span>
+            </div>
+            
+            <div id="combo-display" class="combo-text"></div>
+            <div class="question-box" id="question-text">載入時空數據中...</div>
+            <div class="interaction-area" id="input-area"></div>
+
+            <div class="game-controls">
+                <button class="ctrl-btn" onclick="toggleWhiteboard()">📝 開啟白板</button>
+                <button class="ctrl-btn" onclick="togglePause()">⏸️ 暫停 (Pause)</button>
+                <button class="ctrl-btn" onclick="showScreen('start-screen')">⏹️ 放棄任務</button>
+                <button class="ctrl-btn submit-btn" id="main-submit-btn" onclick="checkAnswer()">發射能量 (Submit)</button>
+            </div>
+
+            <div id="pause-overlay">
+                <h2>時空靜止中 (PAUSED)</h2>
+                <p>題目已屏蔽以防能量外洩</p>
+                <button class="start-btn" onclick="togglePause()" style="margin-top:20px;">解除靜止 (Resume)</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <h1 id="result-title"></h1>
+            <p id="result-desc"></p>
+            <img src="16.jpg" alt="通關徽章" class="badge" id="reward-badge" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIj48Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iI2YxYzQwZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjNlbSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iYmxhY2siIGZvbnQtc2l6ZT0iMjRweCI+QmFkZ2U8L3RleHQ+PC9zdmc+'">
+            <br><br>
+            <div id="result-btns" style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="footer-pill">
+        <div class="footer-left">
+            <div class="footer-dot" aria-hidden="true"></div>
+            <div class="footer-copy">© 2025–2026 Jessie Math 捷析老師. All rights reserved.</div>
+        </div>
+        <div class="footer-right">
+            <div class="footer-icon" aria-hidden="true"><i class="fas fa-compass"></i></div>
+            <div class="footer-tagline">數學不迷路，捷析Jessie帶你走向理解。</div>
+        </div>
+    </footer>
+
+    <script>
+        // ================= Enter 鍵觸發 Submit =================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const gameScreen = document.getElementById('game-screen');
+                const submitBtn = document.getElementById('main-submit-btn');
+                if (gameScreen.classList.contains('active') && submitBtn.style.display !== 'none' && !isPaused) {
+                    checkAnswer();
+                }
+            }
+        });
+
+        // ================= 關卡資料 (生成與隨機打亂) =================
+        let levelData = [];
+
+        function generateLevels() {
+            levelData = [];
+            // 分配三區題目： Zone1(乘法), Zone2(除法與分配), Zone3(間隔/包含除)
+            let types = [0, 1, 2, 0, 1, 2, 0, 1, 2, Math.floor(Math.random() * 3)];
+            
+            // 隨機打亂順序
+            for (let i = types.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [types[i], types[j]] = [types[j], types[i]];
+            }
+
+            for (let i = 0; i < 10; i++) {
+                let typeRand = types[i];
+                
+                if (typeRand === 0) {
+                    // Zone 1: 時間乘法
+                    let unitsOptions = [
+                        { u1: '日', u2: '時', mod: 24, max1: 30, max2: 23 },
+                        { u1: '時', u2: '分', mod: 60, max1: 50, max2: 59 },
+                        { u1: '分', u2: '秒', mod: 60, max1: 50, max2: 59 }
+                    ];
+                    let opt = unitsOptions[Math.floor(Math.random() * unitsOptions.length)];
+                    
+                    let base1 = Math.floor(Math.random() * 3) + 1; // 1~3
+                    let base2 = Math.floor(Math.random() * (opt.mod - 10)) + 10; // 10~50 / 10~20
+                    let multiplier = Math.floor(Math.random() * 6) + 3; // 3~8 倍
+                    
+                    let raw1 = base1 * multiplier;
+                    let raw2 = base2 * multiplier;
+                    let ans2 = raw2 % opt.mod;
+                    let ans1 = raw1 + Math.floor(raw2 / opt.mod);
+                    
+                    const templatesZ1 = [
+                        `修復機器人每完成一個區塊需要 ${base1}${opt.u1} ${base2}${opt.u2}，連續完成 ${multiplier} 個區塊共需多久？`,
+                        `星際軌道車繞行一圈耗時 ${base1}${opt.u1} ${base2}${opt.u2}，連續繞行 ${multiplier} 圈，總共花費多少時間？`,
+                        `防護罩充能一次需 ${base1}${opt.u1} ${base2}${opt.u2}，連續充能 ${multiplier} 次，需要多少時間？`,
+                        `合成晶體每次耗時 ${base1}${opt.u1} ${base2}${opt.u2}，生產 ${multiplier} 個需要多少時間？`,
+                        `雷達掃描一個星區需要 ${base1}${opt.u1} ${base2}${opt.u2}，掃描 ${multiplier} 個星區共需多久？`
+                    ];
+                    let text1 = templatesZ1[Math.floor(Math.random() * templatesZ1.length)] + `\n(請先將未進位的結果填入紅框，再滑動進度條換算至正確單位)`;
+
+                    levelData.push({
+                        type: 'zone1',
+                        zone: "🟢 第一區：時間增幅站",
+                        text: text1,
+                        opt: opt, raw1: raw1, raw2: raw2, ans1: ans1, ans2: ans2
+                    });
+                } 
+                else if (typeRand === 1) {
+                    // Zone 2: 等分除法 (分配能量)
+                    let fragments = Math.floor(Math.random() * 5) + 2; // 2~6 份
+                    let targetH = Math.floor(Math.random() * 2); // 每份 0~1 小時
+                    let targetM = Math.floor(Math.random() * 30) + 15; // 每份 15~44 分鐘
+                    
+                    let targetTotalMins = targetH * 60 + targetM;
+                    let totalMins = targetTotalMins * fragments;
+                    let startH = Math.floor(totalMins / 60);
+                    let startM = totalMins % 60;
+
+                    const templatesZ2 = [
+                        `總修復能量有 ${startH}小時 ${startM}分鐘，必須平均分配給 ${fragments} 個懸浮碎環。`,
+                        `星際引擎充滿需要 ${startH}小時 ${startM}分鐘，若平均分配給 ${fragments} 個推進器，每個推進器獲得多少能量？`,
+                        `總共有 ${startH}小時 ${startM}分鐘 的數據包，需要平均傳輸給 ${fragments} 個接收站。`,
+                        `空間跳躍冷卻時間共 ${startH}小時 ${startM}分鐘，平均分攤到 ${fragments} 個散熱陣列，每個陣列需處理多少時間？`
+                    ];
+                    let text2 = templatesZ2[Math.floor(Math.random() * templatesZ2.length)] + `\n請點擊晶塊進行「切割」，並將能量「拖拉」平均分配到所有碎片上！(每塊達到所需能量即可通關)`;
+
+                    levelData.push({
+                        type: 'zone2',
+                        zone: "🔵 第二區：時間切割港",
+                        text: text2,
+                        targetTotalMins: targetTotalMins, startH: startH, startM: startM, fragments: fragments
+                    });
+                } 
+                else {
+                    // Zone 3: 包含除(要求整除) 或 間隔問題(有上下午)
+                    let subType = Math.random() > 0.5 ? 'A' : 'B';
+                    
+                    if(subType === 'A') {
+                        // 包含除法
+                        let singleM = Math.floor(Math.random() * 5) + 2; 
+                        let singleS = Math.floor(Math.random() * 40) + 10;
+                        let singleTotalS = singleM * 60 + singleS;
+                        
+                        let times = Math.floor(Math.random() * 5) + 4; // 4~8 次
+                        
+                        let totalS = singleTotalS * times; // 完美整除，沒有餘數
+                        let totalM_disp = Math.floor(totalS / 60);
+                        let totalS_disp = totalS % 60;
+                        
+                        let templates3A = [
+                            `防護罩總電量可維持 ${totalM_disp}分鐘 ${totalS_disp}秒。抵擋一次黑洞脈衝需消耗 ${singleM}分鐘 ${singleS}秒。請問這股能量剛好可抵擋幾次脈衝？`,
+                            `星際航母的備用燃料可供飛行 ${totalM_disp}分鐘 ${totalS_disp}秒。每次短程躍遷固定消耗 ${singleM}分鐘 ${singleS}秒的能量。請問這些燃料剛好可進行幾次躍遷？`,
+                            `基地生命維持系統剩餘運作時間 ${totalM_disp}分鐘 ${totalS_disp}秒。每啟動一個休眠艙需消耗 ${singleM}分鐘 ${singleS}秒的運作時間。請問剛好可供幾個休眠艙啟動？`
+                        ];
+                        let text3 = templates3A[Math.floor(Math.random() * templates3A.length)];
+                        
+                        levelData.push({
+                            type: 'zone3', subType: 'A',
+                            zone: "🟣 第三區：黑洞防禦陣",
+                            text: text3 + `\n(請將所有時間轉換為最小單位思考)`,
+                            totalM_disp, totalS_disp, singleM, singleS,
+                            ansTimes: times
+                        });
+                    } else {
+                        // 間隔問題
+                        let intervalM = Math.floor(Math.random() * 15) + 15; // 15~29分
+                        let targetK = Math.floor(Math.random() * 5) + 5; // 第 5~9 次
+                        
+                        let startHour24 = Math.floor(Math.random() * 7) + 8;
+                        let startMin = Math.floor(Math.random() * 40); // 0~39 分
+                        
+                        let startPeriod = startHour24 >= 12 ? '下午' : '上午';
+                        let startH12 = startHour24 > 12 ? startHour24 - 12 : (startHour24 === 0 ? 12 : startHour24);
+
+                        let gaps = targetK - 1;
+                        let totalGapM = gaps * intervalM;
+                        let totalMins = startHour24 * 60 + startMin + totalGapM;
+                        
+                        let endHour24 = Math.floor(totalMins / 60) % 24;
+                        let endMin = totalMins % 60;
+                        
+                        let endPeriod = endHour24 >= 12 ? '下午' : '上午';
+                        let endH12 = endHour24 > 12 ? endHour24 - 12 : (endHour24 === 0 ? 12 : endHour24);
+
+                        let templates3B = [
+                            `星際列車每隔 ${intervalM} 分鐘發出一班車。第 1 班在 ${startPeriod} ${startH12}時 ${startMin}分 發車，請問第 ${targetK} 班發車時刻是什麼時候？`,
+                            `黑洞引力波每隔 ${intervalM} 分鐘衝擊一次。第 1 波在 ${startPeriod} ${startH12}時 ${startMin}分 襲來，請問第 ${targetK} 波衝擊是什麼時候？`,
+                            `無人探測機每隔 ${intervalM} 分鐘回傳一次訊號。第 1 次回傳在 ${startPeriod} ${startH12}時 ${startMin}分，第 ${targetK} 次回傳是何時？`
+                        ];
+
+                        let text3 = templates3B[Math.floor(Math.random() * templates3B.length)];
+
+                        levelData.push({
+                            type: 'zone3', subType: 'B',
+                            zone: "🟣 第三區：時空躍遷站",
+                            text: text3,
+                            intervalM: intervalM, targetK: targetK, startH: startHour24, startM: startMin,
+                            ansGaps: gaps, ansTotalM: totalGapM, ansPeriod: endPeriod, ansH: endH12, ansM: endMin
+                        });
+                    }
+                }
+            }
+        }
+
+        // ================= 遊戲狀態變數 =================
+        let currentPlayer = "";
+        let currentLevelIndex = 0;
+        let score = 0;
+        let timeLeft = 300; 
+        let timerInterval;
+        let isPaused = false;
+        let soundEnabled = true;
+        let blackHoleSafeZone = 100;
+        
+        // Zone 2 data
+        let zone2_inventory = [];
+        let zone2_placed = []; 
+
+        // 簡單音效
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if(!soundEnabled || audioCtx.state === 'suspended') return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if(type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'slice') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.querySelector('.sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
+            if(soundEnabled && audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const bgm = document.getElementById('bgm');
+            if (soundEnabled) {
+                bgm.play().catch(e => console.log(e));
+            } else {
+                bgm.pause();
+            }
+        }
+
+        // ================= 核心邏輯 =================
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            // 切換畫面時自動關閉白板與暫停
+            document.getElementById('star-gate').classList.remove('gate-opening');
+            document.getElementById('pause-overlay').style.display = 'none';
+            document.getElementById('whiteboard-container').style.display = 'none';
+            clearWhiteboard();
+
+            if(id === 'start-screen') {
+                clearInterval(timerInterval);
+                renderLeaderboard();
+                document.getElementById('black-hole-layer').style.display = 'none';
+            }
+        }
+
+        function initGame() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            if(!nameInput) { alert("星際導航員，請先輸入代號！"); return; }
+            
+            generateLevels(); // 生成 10 題，隨機打亂重製
+
+            currentPlayer = nameInput;
+            currentLevelIndex = 0;
+            score = 0;
+            timeLeft = 300;
+            isPaused = false;
+            blackHoleSafeZone = 100;
+            
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // 播放背景音樂
+            const bgm = document.getElementById('bgm');
+            if (soundEnabled) {
+                bgm.play().catch(e => console.log(e));
+            }
+
+            document.getElementById('reward-badge').style.display = 'none';
+            document.getElementById('combo-display').innerText = "";
+            document.getElementById('black-hole-layer').style.display = 'none';
+            document.getElementById('star-gate').classList.remove('gate-opening');
+            
+            showScreen('game-screen');
+            updateHUD();
+            startTimer();
+            loadLevel();
+        }
+
+        function loadLevel() {
+            const level = levelData[currentLevelIndex];
+            document.getElementById('zone-display').innerText = level.zone;
+            document.getElementById('question-text').innerText = level.text;
+            const inputArea = document.getElementById('input-area');
+            inputArea.innerHTML = '';
+            document.getElementById('main-submit-btn').style.display = 'block';
+
+            // 進入下一題強制隱藏黑洞特效與白板
+            document.getElementById('z3-visual-bh') && (document.getElementById('z3-visual-bh').style.display = 'none');
+            document.getElementById('black-hole-layer').style.display = (level.type === 'zone3') ? 'block' : 'none';
+            document.getElementById('whiteboard-container').style.display = 'none';
+            clearWhiteboard();
+
+            if(level.type === 'zone1') {
+                let max1 = level.raw1 + level.ans1 + 10; // 滑桿最大值
+                inputArea.innerHTML = `
+                    <div class="orbit-layout">
+                        <div class="raw-input-box">
+                            <div style="text-align:center;">
+                                <div style="color:#ff4757; font-size:22px; font-weight:bold; margin-bottom:5px;">${level.opt.u1}</div>
+                                <input type="number" id="z1-raw-1" style="width:70px; height:45px; font-size:22px; text-align:center; border:2px solid #ff4757; background:transparent; color:white; border-radius:8px;">
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:#ff4757; font-size:22px; font-weight:bold; margin-bottom:5px;">${level.opt.u2}</div>
+                                <input type="number" id="z1-raw-2" style="width:70px; height:45px; font-size:22px; text-align:center; border:2px solid #ff4757; background:transparent; color:white; border-radius:8px;">
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <div class="orbit-system" id="z1-orbit">
+                                <div class="orbit-ring orbit-outer" id="ring-outer"></div>
+                                <div class="orbit-ring orbit-inner" id="ring-inner"></div>
+                                <div class="orbit-core">
+                                    <div class="orbit-val"><span id="val-1">0</span> ${level.opt.u1}</div>
+                                    <div class="orbit-val"><span id="val-2">0</span> ${level.opt.u2}</div>
+                                </div>
+                            </div>
+                            <div class="orbit-controls">
+                                <div class="orbit-slider-box">
+                                    <label>中環進位 (${level.opt.u1})</label>
+                                    <input type="range" id="slide-1" min="0" max="${max1}" value="0" oninput="updateZone1Rings()">
+                                </div>
+                                <div class="orbit-slider-box">
+                                    <label>外環進位 (${level.opt.u2})</label>
+                                    <input type="range" id="slide-2" min="0" max="${level.opt.mod - 1}" value="0" oninput="updateZone1Rings()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                updateZone1Rings();
+            } 
+            else if(level.type === 'zone2') {
+                zone2_inventory = [];
+                for(let i=0; i<level.startH; i++) zone2_inventory.push(60);
+                let m10 = Math.floor(level.startM / 10);
+                let m1 = level.startM % 10;
+                for(let i=0; i<m10; i++) zone2_inventory.push(10);
+                for(let i=0; i<m1; i++) zone2_inventory.push(1);
+                
+                zone2_placed = [];
+                for(let i=0; i<level.fragments; i++) {
+                    zone2_placed.push([]);
+                }
+                
+                renderZone2UI();
+            }
+            else if(level.type === 'zone3') {
+                if(level.subType === 'A') {
+                    // 整除，多步驟版面 (依照手寫圖示，已調整放大間距與文字)
+                    inputArea.innerHTML = `
+                        <div class="swirling-black-hole" id="z3-visual-bh"></div>
+                        <div style="display:flex; flex-direction:column; gap:15px; align-items:center; width: 100%;">
+                            <div class="z3-input-group" style="flex-wrap: nowrap; padding: 10px 15px; font-size: 16px; gap: 5px;">
+                                總量 <input type="number" id="z3a-t-m" style="width: 50px; height: 35px; font-size: 20px;"> 分 <input type="number" id="z3a-t-s" style="width: 50px; height: 35px; font-size: 20px;"> 秒 
+                                <span class="z3-arrow" style="margin: 0 5px; font-size: 24px;">÷</span>
+                                單次 <input type="number" id="z3a-s-m" style="width: 50px; height: 35px; font-size: 20px;"> 分 <input type="number" id="z3a-s-s" style="width: 50px; height: 35px; font-size: 20px;"> 秒 
+                                <span class="z3-arrow" style="margin: 0 5px; font-size: 24px;">=</span>
+                                剛好 <input type="number" id="z3a-ans-times" style="width: 50px; height: 35px; font-size: 20px;"> 次
+                            </div>
+                            
+                            <div style="display:flex; justify-content:center; gap:25px; flex-wrap:wrap; margin-top: 15px;">
+                                <div class="z3-input-group" style="border-radius:30px; border: 2px dashed #ff4757; padding: 15px 30px;">
+                                    總量換算: <input type="number" id="z3a-conv-t" style="width:120px; border-radius:10px; background:rgba(255,0,0,0.2);"> 秒
+                                </div>
+                                <div class="z3-input-group" style="border-radius:30px; border: 2px dashed #ff4757; padding: 15px 30px;">
+                                    單次換算: <input type="number" id="z3a-conv-s" style="width:120px; border-radius:10px; background:rgba(255,0,0,0.2);"> 秒
+                                </div>
+                            </div>
+                            
+                            <div class="z3-input-group" style="border-radius:30px; border: 2px dashed #f1c40f; padding: 15px 30px; margin-top: 15px;">
+                                <input type="number" id="z3a-final-t" style="width:120px; border-radius:10px; background:rgba(241,196,15,0.2);"> 秒
+                                <span class="z3-arrow">÷</span>
+                                <input type="number" id="z3a-final-s" style="width:120px; border-radius:10px; background:rgba(241,196,15,0.2);"> 秒
+                                <span class="z3-arrow">=</span>
+                                <input type="number" id="z3a-final-ans" style="width:80px; border-radius:10px; background:rgba(241,196,15,0.2);"> 次
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // 上下午判斷 (已放大)
+                    inputArea.innerHTML = `
+                        <div class="swirling-black-hole" id="z3-visual-bh"></div>
+                        <div style="display:flex; flex-direction:column; gap:15px; align-items:center;">
+                            <div class="z3-input-group">
+                                經過間隔數: <input type="number" id="z3b-gaps"> 次
+                                <span class="z3-arrow">➔</span>
+                                總耗時: <input type="number" id="z3b-total-m"> 分鐘
+                            </div>
+                            <div class="z3-input-group" style="margin-top:15px;">
+                                <span style="color:#fff;">發車時刻：</span>
+                                <select id="z3b-ans-period">
+                                    <option value="">選擇</option>
+                                    <option value="上午">上午</option>
+                                    <option value="下午">下午</option>
+                                </select>
+                                <input type="number" id="z3b-ans-h"> 時 <input type="number" id="z3b-ans-m"> 分
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // --- 區塊一邏輯 (數值決定轉速) ---
+        function updateZone1Rings() {
+            let v1 = parseInt(document.getElementById('slide-1').value) || 0;
+            let v2 = parseInt(document.getElementById('slide-2').value) || 0;
+            document.getElementById('val-1').innerText = v1;
+            document.getElementById('val-2').innerText = v2;
+            
+            let ringIn = document.getElementById('ring-inner');
+            let ringOut = document.getElementById('ring-outer');
+            
+            if(v1 > 0) {
+                let speed1 = Math.max(1, 10 - (v1 / 5)); 
+                ringIn.style.animation = `spin ${speed1}s linear infinite`;
+            } else { ringIn.style.animation = 'none'; }
+            
+            if(v2 > 0) {
+                let speed2 = Math.max(0.5, 5 - (v2 / 10)); 
+                ringOut.style.animation = `spin ${speed2}s linear infinite reverse`;
+            } else { ringOut.style.animation = 'none'; }
+        }
+
+        // --- 區塊二邏輯 (切割、融合與拖拉) ---
+        function renderZone2UI() {
+            const inputArea = document.getElementById('input-area');
+            const level = levelData[currentLevelIndex];
+            
+            // 排序庫存，讓大晶塊排前面
+            zone2_inventory.sort((a,b)=>b-a);
+
+            let invHTML = zone2_inventory.map((val, idx) => {
+                let cls = val === 60 ? 'crystal-hr' : (val === 10 ? 'crystal-min10' : 'crystal-min1');
+                let label = val === 60 ? '1 小時' : (val === 10 ? '10 分' : '1 分');
+                return `<div class="crystal-block ${cls}" draggable="true" ondragstart="handleDragStart(event, 'inv', ${idx})" onclick="handleZone2Click('inv', ${idx})">${label}</div>`;
+            }).join('');
+
+            let fragmentsHTML = zone2_placed.map((fragArray, fIdx) => {
+                fragArray.sort((a,b)=>b-a);
+                let placedHTML = fragArray.map((val, itemIdx) => {
+                    let cls = val === 60 ? 'crystal-hr' : (val === 10 ? 'crystal-min10' : 'crystal-min1');
+                    let label = val === 60 ? '1 小時' : (val === 10 ? '10 分' : '1 分');
+                    return `<div class="crystal-block ${cls}" draggable="true" ondragstart="handleDragStart(event, 'frag_${fIdx}', ${itemIdx})" onclick="handleZone2Click('frag_${fIdx}', ${itemIdx})">${label}</div>`;
+                }).join('');
+                
+                if (fragArray.length === 0) placedHTML = '<span style="color:gray;">拖曳至此</span>';
+                
+                return `<div class="target-fragment" id="z2-target-${fIdx}" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'frag_${fIdx}')">${placedHTML}</div>`;
+            }).join('');
+
+            inputArea.innerHTML = `
+                <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom:5px; gap: 15px; flex-wrap: wrap;">
+                    <button class="fuse-btn" onclick="fuseBlocks(10)">🔄 合併 10 個 [1 分] 為 [10 分]</button>
+                    <div style="color:var(--brand-orange); font-size:16px; font-weight:bold;">能量儲存區 (點擊晶塊可向下切割)</div>
+                    <button class="fuse-btn" onclick="fuseBlocks(60)">🔄 合併 6 個 [10 分] 為 [1 小時]</button>
+                </div>
+                <div class="crystal-field" id="z2-inv" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'inv')">${invHTML}</div>
+                <div style="color:var(--neon-blue); margin-top:10px;">待分配碎片區</div>
+                <div class="fragment-container">${fragmentsHTML}</div>
+            `;
+        }
+
+        function fuseBlocks(targetVal) {
+            let needed = targetVal === 60 ? 6 : 10;
+            let searchVal = targetVal === 60 ? 10 : 1;
+            
+            let foundCount = zone2_inventory.filter(v => v === searchVal).length;
+            if(foundCount >= needed) {
+                playSound('slice');
+                for(let i=0; i<needed; i++) {
+                    zone2_inventory.splice(zone2_inventory.indexOf(searchVal), 1);
+                }
+                zone2_inventory.push(targetVal);
+                showMessage(`🔄 晶體融合成功！`);
+                renderZone2UI();
+            } else {
+                showMessage(`⚠️ 儲存區數量不足！需要 ${needed} 個 [${searchVal}分]`);
+            }
+        }
+
+        function handleDragStart(e, source, index) {
+            e.dataTransfer.setData('source', source);
+            e.dataTransfer.setData('index', index);
+        }
+        function allowDrop(e) { e.preventDefault(); }
+        function handleDrop(e, target) {
+            e.preventDefault();
+            let source = e.dataTransfer.getData('source');
+            let index = parseInt(e.dataTransfer.getData('index'));
+            if(source === target || isNaN(index)) return;
+
+            let val;
+            if (source === 'inv') {
+                val = zone2_inventory.splice(index, 1)[0];
+            } else if (source.startsWith('frag_')) {
+                let fIdx = parseInt(source.split('_')[1]);
+                val = zone2_placed[fIdx].splice(index, 1)[0];
+            }
+
+            if (target === 'inv') {
+                zone2_inventory.push(val);
+            } else if (target.startsWith('frag_')) {
+                let fIdx = parseInt(target.split('_')[1]);
+                zone2_placed[fIdx].push(val);
+            }
+            playSound('slice'); 
+            renderZone2UI();
+        }
+
+        function handleZone2Click(source, index) {
+            let targetArray = source === 'inv' ? zone2_inventory : zone2_placed[parseInt(source.split('_')[1])];
+            let val = targetArray[index];
+            
+            if(val === 60) {
+                playSound('slice');
+                targetArray.splice(index, 1);
+                for(let i=0; i<6; i++) targetArray.push(10);
+                showMessage("⚡ 晶體切割：1小時 轉為 6個10分！");
+                renderZone2UI();
+            } else if (val === 10) {
+                playSound('slice');
+                targetArray.splice(index, 1);
+                for(let i=0; i<10; i++) targetArray.push(1);
+                showMessage("⚡ 晶體切割：10分 轉為 10個1分！");
+                renderZone2UI();
+            }
+        }
+
+        function showMessage(msg, duration = 2500) {
+            const el = document.getElementById('combo-display');
+            el.innerText = msg;
+            setTimeout(() => { if(el.innerText === msg) el.innerText = ''; }, duration);
+        }
+
+        // --- 答案驗證與自動進入下一題 ---
+        function checkAnswer() {
+            if(isPaused) return;
+            const level = levelData[currentLevelIndex];
+            let isCorrect = false;
+
+            document.getElementById('whiteboard-container').style.display = 'none';
+
+            if(level.type === 'zone1') {
+                let r1 = parseInt(document.getElementById('z1-raw-1').value);
+                let r2 = parseInt(document.getElementById('z1-raw-2').value);
+                let a1 = parseInt(document.getElementById('slide-1').value);
+                let a2 = parseInt(document.getElementById('slide-2').value);
+                
+                if(r1 === level.raw1 && r2 === level.raw2 && a1 === level.ans1 && a2 === level.ans2) {
+                    isCorrect = true;
+                }
+            } 
+            else if(level.type === 'zone2') {
+                let allCorrect = true;
+                for(let i=0; i<zone2_placed.length; i++) {
+                    let total = zone2_placed[i].reduce((a, b) => a + b, 0);
+                    if (total !== level.targetTotalMins) {
+                        allCorrect = false;
+                        break;
+                    }
+                }
+                if(allCorrect && zone2_placed.length > 0) isCorrect = true;
+            }
+            else if(level.type === 'zone3') {
+                if(level.subType === 'A') {
+                    let tm = parseInt(document.getElementById('z3a-t-m').value) || 0;
+                    let ts = parseInt(document.getElementById('z3a-t-s').value) || 0;
+                    let sm = parseInt(document.getElementById('z3a-s-m').value) || 0;
+                    let ss = parseInt(document.getElementById('z3a-s-s').value) || 0;
+                    let ansT = parseInt(document.getElementById('z3a-ans-times').value);
+                    
+                    let convT = parseInt(document.getElementById('z3a-conv-t').value);
+                    let convS = parseInt(document.getElementById('z3a-conv-s').value);
+                    let ft = parseInt(document.getElementById('z3a-final-t').value);
+                    let fs = parseInt(document.getElementById('z3a-final-s').value);
+                    let fans = parseInt(document.getElementById('z3a-final-ans').value);
+
+                    let correctTotalS = level.totalM_disp * 60 + level.totalS_disp;
+                    let correctSingleS = level.singleM * 60 + level.singleS;
+
+                    if(tm === level.totalM_disp && ts === level.totalS_disp && 
+                       sm === level.singleM && ss === level.singleS && ansT === level.ansTimes &&
+                       convT === correctTotalS && convS === correctSingleS &&
+                       ft === correctTotalS && fs === correctSingleS && fans === level.ansTimes) {
+                        isCorrect = true;
+                    }
+                } else {
+                    let g = parseInt(document.getElementById('z3b-gaps').value);
+                    let tm = parseInt(document.getElementById('z3b-total-m').value);
+                    let ap = document.getElementById('z3b-ans-period').value;
+                    let ah = parseInt(document.getElementById('z3b-ans-h').value);
+                    let am = parseInt(document.getElementById('z3b-ans-m').value);
+                    
+                    if(g === level.ansGaps && tm === level.ansTotalM && 
+                       ap === level.ansPeriod && ah === level.ansH && am === level.ansM) {
+                        isCorrect = true;
+                    }
+                }
+            }
+
+            if(isCorrect) {
+                score++;
+                updateHUD();
+                document.getElementById('main-submit-btn').style.display = 'none';
+
+                if(level.type === 'zone1') {
+                    playSound('correct');
+                    document.getElementById('z1-orbit').classList.add('beam-active');
+                    showMessage("✨ 光譜連線成功！軌道校準完成！");
+                    setTimeout(nextLevel, 2000);
+                } 
+                else if(level.type === 'zone2') {
+                    playSound('correct');
+                    zone2_placed.forEach((frag, idx) => {
+                        document.getElementById(`z2-target-${idx}`).classList.add('completed');
+                    });
+                    showMessage("🔗 能量分配完美！星環修復！");
+                    setTimeout(nextLevel, 2000);
+                } 
+                else if(level.type === 'zone3') {
+                    let bh = document.getElementById('z3-visual-bh');
+                    bh.style.display = 'block';
+                    playSound('correct');
+                    
+                    let threw = 0;
+                    let throwInt = setInterval(() => {
+                        if(threw >= 15) {
+                            clearInterval(throwInt);
+                            document.getElementById('game-screen').classList.add('space-beam');
+                            blackHoleSafeZone = 150;
+                            updateBlackHoleCSS();
+                            showMessage("💥 邏輯陣列啟動！黑洞退散！");
+                            setTimeout(nextLevel, 2000);
+                        } else {
+                            let particle = document.createElement('div');
+                            particle.className = 'throw-item';
+                            particle.style.left = (50 + (Math.random()*40 - 20)) + 'px';
+                            bh.appendChild(particle);
+                            setTimeout(()=>particle.remove(), 300);
+                            threw++;
+                        }
+                    }, 80);
+                }
+            } else {
+                playSound('wrong');
+                document.getElementById('main-submit-btn').style.display = 'none'; 
+                
+                let correctMsg = "";
+                if(level.type === 'zone1') {
+                    correctMsg = `⚠️ 答錯！正確：紅框 ${level.raw1}${level.opt.u1} ${level.raw2}${level.opt.u2}，滑桿 ${level.ans1}${level.opt.u1} ${level.ans2}${level.opt.u2}`;
+                } else if(level.type === 'zone2') {
+                    const targets = document.querySelectorAll('.target-fragment');
+                    targets.forEach(t => {
+                        t.classList.add('energy-shock');
+                        setTimeout(()=>t.classList.remove('energy-shock'), 500);
+                    });
+                    correctMsg = `⚠️ 答錯！請確認所有碎片是否精準分配能量`;
+                } else if(level.type === 'zone3') {
+                    if(level.subType === 'A') correctMsg = `⚠️ 答錯！請確認「所有換算步驟」與最終答案(${level.ansTimes} 次)是否正確。`;
+                    else correctMsg = `⚠️ 答錯！正確：間隔 ${level.ansGaps}次，總耗時 ${level.ansTotalM}分，時刻 ${level.ansPeriod} ${level.ansH}時 ${level.ansM}分`;
+                }
+                
+                showMessage(correctMsg, 4000);
+                setTimeout(nextLevel, 4000);
+            }
+        }
+
+        function nextLevel() {
+            document.getElementById('game-screen').classList.remove('space-beam');
+            currentLevelIndex++;
+            if(currentLevelIndex >= levelData.length) {
+                endGameSequence();
+            } else {
+                loadLevel();
+            }
+        }
+
+        function endGameSequence() {
+            clearInterval(timerInterval);
+            if(score >= 5) {
+                document.getElementById('star-gate').classList.add('gate-opening');
+                setTimeout(() => { endGame(); }, 2000);
+            } else {
+                endGame();
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').innerText = `修復進度：${score} / 10`;
+        }
+
+        function updateBlackHoleCSS() {
+            const bh = document.getElementById('black-hole-layer');
+            bh.style.setProperty('--safe-zone', `${blackHoleSafeZone}%`);
+            bh.style.setProperty('--danger-zone', `${blackHoleSafeZone + 20}%`);
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(!isPaused) {
+                    timeLeft--;
+                    let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                    let s = (timeLeft % 60).toString().padStart(2, '0');
+                    document.getElementById('timer-display').innerText = `時空崩塌倒數：${m}:${s}`;
+                    
+                    if(currentLevelIndex >= 6) { // 後期加速黑洞
+                        blackHoleSafeZone -= 0.5;
+                        if(blackHoleSafeZone < 10) blackHoleSafeZone = 10;
+                        updateBlackHoleCSS();
+                    }
+
+                    if(timeLeft <= 0) {
+                        isPaused = true;
+                        endGameSequence();
+                    }
+                }
+            }, 1000);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pause-overlay').style.display = isPaused ? 'flex' : 'none';
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('black-hole-layer').style.display = 'none';
+            showScreen('result-screen');
+            
+            const isWin = score >= 5;
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-desc');
+            const status = isWin ? "任務成功" : "任務失敗";
+            const btnContainer = document.getElementById('result-btns');
+            
+            btnContainer.innerHTML = '';
+            
+            if(isWin) {
+                title.innerText = "🎉 軌道修復完成！新星門開啟！";
+                title.style.color = "var(--neon-purple)";
+                desc.innerText = `太棒了，${currentPlayer}！你成功拯救了晶質基站並擊退黑洞。\n總共答對了 ${score} 題！`;
+                document.getElementById('reward-badge').style.display = 'block';
+                btnContainer.innerHTML = `<button class="start-btn" onclick="showScreen('start-screen')">返回主星港</button>`;
+            } else {
+                const words = [
+                    "失敗為成功之母，再試一次吧！", 
+                    "不要灰心，宇宙的奧秘需要耐心解開！", 
+                    "差一點點就成功了，加油！", 
+                    "星際導航員，重新振作起來！",
+                    "黑洞的引力太強了，但你的潛力無窮，再來一次！"
+                ];
+                const randomMsg = words[Math.floor(Math.random() * words.length)];
+
+                title.innerText = "💥 時空崩塌...";
+                title.style.color = "red";
+                desc.innerText = `能量不足，晶質基站被黑洞吞噬。\n你答對了 ${score} 題。\n${randomMsg}`;
+                document.getElementById('reward-badge').style.display = 'none';
+                btnContainer.innerHTML = `
+                    <button class="start-btn" onclick="showScreen('start-screen')">返回主星港</button>
+                    <button class="start-btn" onclick="initGame()" style="background:linear-gradient(45deg, #e74c3c, #c0392b);">再挑戰一次</button>
+                `;
+            }
+            saveRecord(status);
+        }
+
+        // ================= 排行榜系統 =================
+        function saveRecord(status) {
+            let records = JSON.parse(localStorage.getItem('jessieMathRecords2')) || [];
+            const now = new Date();
+            const timeStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            records.push({ name: currentPlayer, score: score, status: status, time: timeStr });
+            records.sort((a, b) => b.score - a.score);
+            localStorage.setItem('jessieMathRecords2', JSON.stringify(records));
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            let records = JSON.parse(localStorage.getItem('jessieMathRecords2')) || [];
+            const medals = ["🥇", "🥈", "🥉"];
+            
+            records.slice(0, 10).forEach((rec, index) => {
+                const rankIcon = index < 3 ? medals[index] : `🎖️ ${index+1}`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${rankIcon}</td><td>${rec.name}</td><td>${rec.score} / 10</td>
+                        <td style="color:${rec.status==='任務成功'?'#2ecc71':'#e74c3c'}">${rec.status}</td>
+                        <td>${rec.time}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ================= 白板功能 (Canvas) =================
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentDrawMode = 'pen';
+
+        function setDrawMode(mode) {
+            currentDrawMode = mode;
+            
+            document.querySelectorAll('.wb-controls button').forEach(b => b.classList.remove('wb-active-btn'));
+            document.getElementById('wb-btn-' + mode).classList.add('wb-active-btn');
+
+            if (mode === 'mouse') {
+                canvas.style.pointerEvents = 'none';
+            } else {
+                canvas.style.pointerEvents = 'auto';
+                if (mode === 'pen') {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 3; 
+                } else if (mode === 'eraser') {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = 30; 
+                }
+            }
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('whiteboard-container');
+            if(!container) return;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            setDrawMode(currentDrawMode);
+        }
+
+        function toggleWhiteboard() {
+            const wb = document.getElementById('whiteboard-container');
+            if(wb.style.display === 'block') { 
+                wb.style.display = 'none'; 
+            } else { 
+                wb.style.display = 'block'; 
+                resizeCanvas(); 
+                setDrawMode('pen'); 
+            }
+        }
+
+        function clearWhiteboard() { 
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        }
+
+        const startPos = (e) => { 
+            if(currentDrawMode === 'mouse') return;
+            isDrawing = true; 
+            draw(e); 
+        };
+        const endPos = () => { 
+            isDrawing = false; 
+            ctx.beginPath(); 
+        };
+        const draw = (e) => {
+            if(!isDrawing || currentDrawMode === 'mouse') return; 
+            if(e.target === canvas) e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+        };
+
+        canvas.addEventListener('mousedown', startPos); 
+        canvas.addEventListener('mouseup', endPos);
+        canvas.addEventListener('mousemove', draw); 
+        canvas.addEventListener('touchstart', startPos, {passive: false});
+        canvas.addEventListener('touchend', endPos); 
+        canvas.addEventListener('touchmove', draw, {passive: false});
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('whiteboard-container').style.display === 'block') {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                resizeCanvas();
+                ctx.drawImage(tempCanvas, 0, 0);
+            }
+        });
+
+        window.onload = () => { renderLeaderboard(); };
+    </script>
+</body>
+</html>
